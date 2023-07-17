@@ -92,6 +92,16 @@ const MainInput = ({ notesCreationHandler }) => {
       return;
     } else {
       setIsFormFocused(false);
+      handleSubmit();
+    }
+  };
+  const titleBlurHandler = (e) => {
+    e.stopPropagation();
+    if (e.relatedTarget && e.relatedTarget.name === "noteText") {
+      return;
+    } else {
+      setIsFormFocused(false);
+      handleSubmit();
     }
   };
   return (
@@ -108,6 +118,7 @@ const MainInput = ({ notesCreationHandler }) => {
             placeholder="Title"
             onChange={handleChange}
             value={values.title}
+            onBlur={titleBlurHandler}
           />
         )}
         <TextField
@@ -118,7 +129,7 @@ const MainInput = ({ notesCreationHandler }) => {
           onBlur={textFieldBlurHandler}
         />
         <NoteMenu>
-          <button type="submit">Create Note</button>
+          {/* <button type="submit">Create Note</button> */}
           <button>Cancel</button>
         </NoteMenu>
       </Form>
