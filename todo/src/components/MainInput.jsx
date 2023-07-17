@@ -1,6 +1,7 @@
 import styled from "@emotion/styled";
 import { v4 as uuidv4 } from "uuid";
 import { useFormik } from "formik";
+import { useState } from "react";
 
 const MainInputContainer = styled.div`
   display: flex;
@@ -39,7 +40,6 @@ export const Form = styled.form`
   max-width: 550px;
 `;
 export const FormTitle = styled.input`
-  /* display: none; */
   height: 22px;
   padding: 15px;
   font-family: Roboto;
@@ -47,7 +47,7 @@ export const FormTitle = styled.input`
   font-size: 18px;
   line-height: 22px;
   vertical-align: middle;
-  border: none;
+  border: 2px solid red;
   &::placeholder {
     color: #4c4c4c;
     font-weight: 500;
@@ -63,6 +63,7 @@ export const NoteMenu = styled.div`
   width: 100%;
 `;
 const MainInput = ({ notesCreationHandler }) => {
+  const [isFormFocused, setIsFormFocused] = useState(false);
   const { resetForm, handleSubmit, handleChange, values } = useFormik({
     initialValues: {
       title: "",
@@ -73,26 +74,48 @@ const MainInput = ({ notesCreationHandler }) => {
         ...values,
         id: uuidv4(),
       };
-      console.log(finalNote);
       notesCreationHandler(finalNote);
       resetForm();
     },
   });
-
+  const formBlurHandler = (e) => {
+    setIsFormFocused(false);
+    handleSubmit();
+    e.stopPropagation();
+  };
+  const formFocusHandler1 = () => {
+    setIsFormFocused(true);
+  };
+  const textFieldBlurHandler = (e) => {
+    e.stopPropagation();
+    if (e.relatedTarget && e.relatedTarget.name === "title") {
+      return;
+    } else {
+      setIsFormFocused(false);
+    }
+  };
   return (
     <MainInputContainer>
-      <Form onSubmit={handleSubmit}>
-        <FormTitle
-          name="title"
-          placeholder="Title"
-          onChange={handleChange}
-          value={values.title}
-        />
+      <Form
+        name="specialForm"
+        onSubmit={handleSubmit}
+        onFocus={formFocusHandler1}
+        onBlur={formBlurHandler}
+      >
+        {isFormFocused && (
+          <FormTitle
+            name="title"
+            placeholder="Title"
+            onChange={handleChange}
+            value={values.title}
+          />
+        )}
         <TextField
           name="noteText"
           placeholder="Take a note..."
           onChange={handleChange}
           value={values.noteText}
+          onBlur={textFieldBlurHandler}
         />
         <NoteMenu>
           <button type="submit">Create Note</button>

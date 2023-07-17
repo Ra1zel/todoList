@@ -15,7 +15,9 @@ const App = () => {
   const [notes, setNotes] = useState([]);
   console.log(notes);
   const notesCreationHandler = (newNote) => {
-    setNotes([...notes, newNote]);
+    if (newNote.noteText) {
+      setNotes([...notes, newNote]);
+    }
   };
 
   const notesEditHandler = (id, newNote) => {
