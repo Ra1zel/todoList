@@ -10,7 +10,7 @@ import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import Paper from "@mui/material/Paper";
 import { useFormik } from "formik";
-
+import Grid from "@mui/material/Grid";
 const MainContainer = styled.div`
   display: flex;
   flex-direction: column;
@@ -39,6 +39,7 @@ const App = () => {
   const [matchingNotes, setMatchingNotes] = useState([]);
   const [isSearchbarFocused, setIsSearchBarFocused] = useState(false);
   const [isMainInputFocused, setIsMainInputFocused] = useState(false);
+  const [showDisplayNote, setShowDisplayNote] = useState(false);
   const { values, resetForm, handleSubmit, handleChange } = useFormik({
     initialValues: {
       title: "",
@@ -130,9 +131,13 @@ const App = () => {
     handleSubmit();
     e.stopPropagation();
   };
+  const noteDisplayHandler = () => {
+    setShowDisplayNote(true);
+  };
   return (
     <>
       <NavigationBar />
+      <CustomizedDialogs />
       <Box
         style={{
           display: "flex",
@@ -163,8 +168,6 @@ const App = () => {
                 style={{
                   width: "100%",
                 }}
-                // id="outlined-multiline-flexible"
-                // label="Multiline"
                 multiline
                 maxRows={10}
                 onChange={handleChange}
@@ -175,48 +178,23 @@ const App = () => {
           </Paper>
         </Box>
       </Box>
-      {/* <CustomizedDialogs /> */}
-      {/* <h1>Notes application</h1> */}
-      {/* <Navbar
-        queryHandler={returnMatchingNotesFromSearchQuery}
-        getSearchbarState={displaySearchResults}
-        searchbarState={isSearchbarFocused}
-      /> */}
-      {!isSearchbarFocused && (
-        <MainInput notesCreationHandler={notesCreationHandler} />
-      )}
-      <MainContainer>
-        {isSearchbarFocused ? (
-          <div>
-            {!matchingNotes && <div></div>}
-            {matchingNotes &&
-              matchingNotes.map((note) => {
-                return (
-                  <NoteCard
-                    note={note}
-                    key={note.id}
-                    id={note.id}
-                    notesEditHandler={notesEditHandler}
-                    notesDeletionHandler={notesDeletionHandler}
-                  ></NoteCard>
-                );
-              })}
-          </div>
-        ) : (
-          notes &&
-          notes.map((note) => {
-            return (
-              <NoteCard
-                note={note}
-                key={note.id}
-                id={note.id}
-                notesEditHandler={notesEditHandler}
-                notesDeletionHandler={notesDeletionHandler}
-              />
-            );
-          })
-        )}
-      </MainContainer>
+      <Grid
+        container
+        spacing={1}
+        style={{ width: "100%" }}
+        justifyContent="center"
+      >
+        {notes.map((note) => {
+          return (
+            <Grid item xs={2.8} key={note.key} onClick={noteDisplayHandler}>
+              <Paper style={{ padding: "15px" }}>
+                <h2>{note.title}</h2>
+                <p>{note.noteContent}</p>
+              </Paper>
+            </Grid>
+          );
+        })}
+      </Grid>
     </>
   );
 };

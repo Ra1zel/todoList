@@ -2,7 +2,8 @@ import { useState } from "react";
 import { useFormik } from "formik";
 import { Form, FormTitle, TextField, NoteMenu } from "./MainInput";
 import styled from "@emotion/styled";
-
+import Paper from "@mui/material/Paper";
+import Grid from "@mui/material/Grid";
 const NoteContainer = styled.div`
   width: 300px;
   padding: 10px;
@@ -14,33 +15,39 @@ const NoteContainer = styled.div`
   }
 `;
 
-function NoteCard({ note, notesEditHandler, notesDeletionHandler, id }) {
-  const [editFlag, setEditFlag] = useState(false);
-  const { resetForm, handleSubmit, handleChange, values } = useFormik({
-    initialValues: {
-      title: note.title,
-      noteText: note.noteText,
-    },
-    onSubmit: (values) => {
-      console.log(values);
-      notesEditHandler(id, values);
-      resetForm();
-      setEditFlag(false);
-    },
-  });
+function NoteCard({ note }) {
+  // const [editFlag, setEditFlag] = useState(false);
+  // const { resetForm, handleSubmit, handleChange, values } = useFormik({
+  //   initialValues: {
+  //     title: note.title,
+  //     noteText: note.noteText,
+  //   },
+  //   onSubmit: (values) => {
+  //     console.log(values);
+  //     notesEditHandler(id, values);
+  //     resetForm();
+  //     setEditFlag(false);
+  //   },
+  // });
 
-  const EnableEditHandler = () => {
-    setEditFlag(true);
-  };
-  const DeleteNoteHandler = () => {
-    notesDeletionHandler(id);
-  };
-  const CancelEditProcessHandler = () => {
-    setEditFlag(false);
-  };
+  // const EnableEditHandler = () => {
+  //   setEditFlag(true);
+  // };
+  // const DeleteNoteHandler = () => {
+  //   notesDeletionHandler(id);
+  // };
+  // const CancelEditProcessHandler = () => {
+  //   setEditFlag(false);
+  // };
   return (
     <>
-      {editFlag === true ? (
+      <Grid item xs={2.8}>
+        <Paper>
+          <h2>note.title</h2>
+          <p>note.noteContent</p>
+        </Paper>
+      </Grid>
+      {/* {editFlag === true ? (
         <NoteContainer>
           <Form onSubmit={handleSubmit}>
             <FormTitle
@@ -69,7 +76,7 @@ function NoteCard({ note, notesEditHandler, notesDeletionHandler, id }) {
           <button onClick={EnableEditHandler}>Edit</button>
           <button onClick={DeleteNoteHandler}>Delete</button>
         </NoteContainer>
-      )}
+      )} */}
     </>
   );
 }
