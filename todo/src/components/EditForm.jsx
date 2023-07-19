@@ -2,7 +2,7 @@ import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import styled from "@emotion/styled";
 import { useFormik } from "formik";
-
+import { NoteBottomBar } from "../App";
 const MyTextField = styled(TextField)({
   "& .MuiOutlinedInput-root": {
     "& fieldset": {
@@ -17,7 +17,12 @@ const MyTextField = styled(TextField)({
   },
 });
 
-const EditForm = ({ activeNote, onClose, notesEditHandler }) => {
+const EditForm = ({
+  activeNote,
+  handleClose,
+  notesEditHandler,
+  deletionCallback,
+}) => {
   const editForm = useFormik({
     initialValues: {
       title: activeNote.title,
@@ -25,7 +30,7 @@ const EditForm = ({ activeNote, onClose, notesEditHandler }) => {
     },
     onSubmit: (values) => {
       notesEditHandler(activeNote.id, values);
-      onClose();
+      handleClose();
     },
   });
   const onInputChange = (e) => {
@@ -53,6 +58,12 @@ const EditForm = ({ activeNote, onClose, notesEditHandler }) => {
             value={editForm.values.noteContent}
             onChange={onInputChange}
           ></MyTextField>
+          <NoteBottomBar
+            closeBtnCallback={handleClose}
+            noteDeletionCb={deletionCallback}
+            noteId={activeNote.id}
+            doesNoteExist={true}
+          />
         </form>
       </Box>
     </div>

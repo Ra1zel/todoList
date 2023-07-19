@@ -14,18 +14,18 @@ import Dialog from "@mui/material/Dialog";
 import Button from "@mui/material/Button";
 import EditForm from "./components/editForm";
 import Icon from "@mui/material/Icon";
+import ClickAwayListener from "@mui/base/ClickAwayListener";
 /////////////////
 import ColorLensOutlinedIcon from "@mui/icons-material/ColorLensOutlined";
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
 ////////////////
-const MainContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  margin-top: 50px;
-`;
-
+// const MainContainer = styled.div`
+//   display: flex;
+//   flex-direction: column;
+//   align-items: center;
+//   justify-content: center;
+//   margin-top: 50px;
+// `;
 const MyTextField = styled(TextField)({
   "& .MuiOutlinedInput-root": {
     "& fieldset": {
@@ -40,18 +40,25 @@ const MyTextField = styled(TextField)({
   },
 });
 
-const NoteBottomBar = ({ name, isMainInputFocused }) => {
-  const ClickHandler = (e) => {
-    console.log(e.target);
+const WrapperDiv = styled.div`
+  content-visibility: ${(props) =>
+    props.isMainInputFocused ? "visible" : "hidden"};
+`;
+export const NoteBottomBar = ({
+  name,
+  closeBtnCallback,
+  doesNoteExist,
+  noteDeletionCb,
+  noteId = null,
+  isMainInputFocused = true,
+}) => {
+  const clickHandler = () => {
+    closeBtnCallback();
   };
-  const WrapperDiv = styled.div`
-    display: ${(props) => (props.isMainInputFocused ? "block" : "none")};
-  `;
   return (
     <WrapperDiv isMainInputFocused={isMainInputFocused}>
       <Box
         name={name}
-        onClick={ClickHandler}
         style={{
           display: "flex",
           justifyContent: "space-between",
@@ -76,17 +83,29 @@ const NoteBottomBar = ({ name, isMainInputFocused }) => {
               }}
             />
           </Button>
-          <Button
-            name={name}
-            style={{
-              color: "red",
-            }}
-          >
-            <DeleteOutlineOutlinedIcon style={{ padding: "0", margin: "0" }} />
-          </Button>
+          {doesNoteExist && (
+            <Button
+              name={name}
+              onClick={() => {
+                noteDeletionCb(noteId);
+                clickHandler();
+              }}
+              style={{
+                color: "red",
+              }}
+            >
+              <DeleteOutlineOutlinedIcon
+                style={{ padding: "0", margin: "0" }}
+              />
+            </Button>
+          )}
         </div>
         <div>
-          <Button name={name} style={{ padding: "3px", margin: "3px" }}>
+          <Button
+            name={name}
+            style={{ padding: "3px", margin: "3px" }}
+            onClick={clickHandler}
+          >
             Close
           </Button>
         </div>
@@ -102,6 +121,8 @@ const App = () => {
   const [isSearchbarFocused, setIsSearchBarFocused] = useState(false);
   const [isMainInputFocused, setIsMainInputFocused] = useState(false);
   const [showDisplayNote, setShowDisplayNote] = useState(false);
+  // const [isCardHovered, setIsCardHovered] = useState(false);
+  const enclosingDivRef = useRef(null);
   const [activeNote, setActiveNote] = useState({
     id: "",
     title: "",
@@ -170,39 +191,6 @@ const App = () => {
   const mainInputFocusHandler = () => {
     setIsMainInputFocused(true);
   };
-  const textFieldBlurHandler = (e) => {
-    e.stopPropagation();
-    console.log(e.relatedTarget.name);
-    if (
-      e.relatedTarget &&
-      (e.relatedTarget.name === "title" || e.relatedTarget.name === "bottomBar")
-    ) {
-      return;
-    } else {
-      setIsMainInputFocused(false);
-      creationForm.handleSubmit();
-    }
-    setIsMainInputFocused(false);
-  };
-  const titleBlurHandler = (e) => {
-    e.stopPropagation();
-    console.log(e.relatedTarget.name);
-    if (
-      e.relatedTarget &&
-      (e.relatedTarget.name === "noteContent" ||
-        e.relatedTarget.name === "bottomBar")
-    ) {
-      return;
-    } else {
-      setIsMainInputFocused(false);
-      creationForm.handleSubmit();
-    }
-  };
-  const formBlurHandler = (e) => {
-    setIsMainInputFocused(false);
-    creationForm.handleSubmit();
-    e.stopPropagation();
-  };
   const noteDisplayHandlerForParent = (e, elementId) => {
     setShowDisplayNote(true);
     const [titleTag, contentTag] = e.target.children;
@@ -227,54 +215,71 @@ const App = () => {
   const handleClose = () => {
     setShowDisplayNote(false);
   };
+  const handleClickAway = () => {
+    setIsMainInputFocused(false);
+    creationForm.handleSubmit();
+  };
   return (
     <>
       <NavigationBar />
       <Box
+        name="noteComponent"
         style={{
           display: "flex",
           width: "100%",
           justifyContent: "center",
         }}
       >
-        <Box style={{ width: "550px", margin: "25px" }}>
-          <Paper elevation={2}>
-            <form onFocus={mainInputFocusHandler} onBlur={formBlurHandler}>
-              {isMainInputFocused && (
+        <ClickAwayListener onClickAway={handleClickAway}>
+          <Box
+            name="noteComponent"
+            style={{ width: "550px", margin: "25px" }}
+            ref={enclosingDivRef}
+          >
+            <Paper elevation={2} name="noteComponent">
+              <form
+                // onBlur={formBlurHandler}
+                /*onFocus={mainInputFocusHandler}*/ name="noteComponent"
+              >
+                <WrapperDiv isMainInputFocused={isMainInputFocused}>
+                  <MyTextField
+                    name="title"
+                    id="title"
+                    placeholder="Title"
+                    style={{
+                      width: "100%",
+                    }}
+                    onChange={creationForm.handleChange}
+                    value={creationForm.values.title}
+                    // onBlur={titleBlurHandler}
+                  />
+                </WrapperDiv>
                 <MyTextField
-                  name="title"
-                  id="title"
-                  placeholder="Title"
+                  name="noteContent"
+                  id="noteContent"
+                  placeholder="Take a note..."
                   style={{
                     width: "100%",
                   }}
+                  multiline
+                  maxRows={10}
                   onChange={creationForm.handleChange}
-                  value={creationForm.values.title}
-                  onBlur={titleBlurHandler}
+                  value={creationForm.values.noteContent}
+                  // onBlur={textFieldBlurHandler}
+                  onClick={mainInputFocusHandler}
                 />
-              )}
-              <MyTextField
-                name="noteContent"
-                id="noteContent"
-                placeholder="Take a note..."
-                style={{
-                  width: "100%",
-                }}
-                multiline
-                maxRows={10}
-                onChange={creationForm.handleChange}
-                value={creationForm.values.noteContent}
-                onBlur={textFieldBlurHandler}
-              />
-              {
-                <NoteBottomBar
-                  name="bottomBar"
-                  isMainInputFocused={isMainInputFocused}
-                />
-              }
-            </form>
-          </Paper>
-        </Box>
+                {
+                  <NoteBottomBar
+                    isMainInputFocused={isMainInputFocused}
+                    closeBtnCallback={handleClickAway}
+                    name="noteComponent"
+                    doesNoteExist={false}
+                  />
+                }
+              </form>
+            </Paper>
+          </Box>
+        </ClickAwayListener>
       </Box>
       <Grid
         container
@@ -289,6 +294,8 @@ const App = () => {
               xs={2.8}
               key={note.id}
               onClick={(e) => noteDisplayHandlerForParent(e, note.id)}
+              onMouseEnter={() => setIsCardHovered(true)}
+              onMouseLeave={() => setIsCardHovered(false)}
             >
               <Paper style={{ padding: "15px" }}>
                 <h2 onClick={(e) => noteDisplayHandlerForChildren(e, note.id)}>
@@ -307,6 +314,8 @@ const App = () => {
           activeNote={activeNote}
           handleClose={handleClose}
           notesEditHandler={notesEditHandler}
+          closeBtnCallback={handleClose}
+          deletionCallback={notesDeletionHandler}
         />
         {/* <DialogTitle>{activeNote.title}</DialogTitle>
         <DialogContent>
