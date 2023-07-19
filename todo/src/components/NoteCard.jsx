@@ -1,50 +1,23 @@
-import { useState } from "react";
-import { useFormik } from "formik";
-import { Form, FormTitle, TextField, NoteMenu } from "./MainInput";
-import styled from "@emotion/styled";
 import Paper from "@mui/material/Paper";
 import Grid from "@mui/material/Grid";
-const NoteContainer = styled.div`
-  width: 300px;
-  padding: 10px;
-  margin: 10px;
-  border: 1px solid #a7a6a648;
-  &:hover {
-    box-shadow: 0 2px 3px 2px #3232324e;
-    transition: cubic-bezier(0.39, 0.575, 0.565, 1) 0.2s box-shadow;
-  }
-`;
+// const NoteContainer = styled.div`
+//   width: 300px;
+//   padding: 10px;
+//   margin: 10px;
+//   border: 1px solid #a7a6a648;
+//   &:hover {
+//     box-shadow: 0 2px 3px 2px #3232324e;
+//     transition: cubic-bezier(0.39, 0.575, 0.565, 1) 0.2s box-shadow;
+//   }
+// `;
 
 function NoteCard({ note }) {
-  // const [editFlag, setEditFlag] = useState(false);
-  // const { resetForm, handleSubmit, handleChange, values } = useFormik({
-  //   initialValues: {
-  //     title: note.title,
-  //     noteText: note.noteText,
-  //   },
-  //   onSubmit: (values) => {
-  //     console.log(values);
-  //     notesEditHandler(id, values);
-  //     resetForm();
-  //     setEditFlag(false);
-  //   },
-  // });
-
-  // const EnableEditHandler = () => {
-  //   setEditFlag(true);
-  // };
-  // const DeleteNoteHandler = () => {
-  //   notesDeletionHandler(id);
-  // };
-  // const CancelEditProcessHandler = () => {
-  //   setEditFlag(false);
-  // };
   return (
     <>
       <Grid item xs={2.8}>
         <Paper>
-          <h2>note.title</h2>
-          <p>note.noteContent</p>
+          <h2>{note.title}</h2>
+          <p>{note.noteContent}</p>
         </Paper>
       </Grid>
       {/* {editFlag === true ? (
