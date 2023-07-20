@@ -92,11 +92,10 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   },
 }));
 
-export const NavigationBar = () => {
+export const NavigationBar = ({ searchStringSetter }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = useState(null);
   const [isSearchFieldFocused, setIsSearchFieldFocused] = useState(null);
-
   const { values, setFieldValue, resetForm } = useFormik({
     initialValues: {
       searchField: "",
@@ -105,7 +104,7 @@ export const NavigationBar = () => {
   const handleInputChange = (event) => {
     const { name, value } = event.target;
     setFieldValue(name, value);
-    console.log(value);
+    searchStringSetter(value);
     // queryHandler(value);
   };
   const isMenuOpen = Boolean(anchorEl);
@@ -206,6 +205,8 @@ export const NavigationBar = () => {
   };
   const searchCancellationHandler = () => {
     setIsSearchFieldFocused(false);
+    searchStringSetter("");
+    resetForm();
   };
   return (
     <Box sx={{ flexGrow: 1 }}>
@@ -228,27 +229,32 @@ export const NavigationBar = () => {
           >
             Keep
           </Typography>
-          <Search>
-            <SearchIconWrapper>
-              <SearchIcon />
-            </SearchIconWrapper>
-            <StyledInputBase
-              placeholder="Search…"
-              inputProps={{ "aria-label": "search" }}
-              onChange={handleInputChange}
-              onFocus={searchBarFocusHandler}
-            />
-            {isSearchFieldFocused && (
-              <ClearIcon
-                style={{
-                  justifyContent: "center",
-                  margin: "auto",
-                  paddingRight: "5px",
-                }}
-                onClick={searchCancellationHandler}
+          <form>
+            <Search>
+              <SearchIconWrapper>
+                <SearchIcon />
+              </SearchIconWrapper>
+              <StyledInputBase
+                placeholder="Search…"
+                inputProps={{ "aria-label": "search" }}
+                onChange={handleInputChange}
+                onFocus={searchBarFocusHandler}
+                name="searchField"
+                id="searchField"
+                value={values.searchField}
               />
-            )}
-          </Search>
+              {isSearchFieldFocused && (
+                <ClearIcon
+                  style={{
+                    justifyContent: "center",
+                    margin: "auto",
+                    paddingRight: "5px",
+                  }}
+                  onClick={searchCancellationHandler}
+                />
+              )}
+            </Search>
+          </form>
           <Box sx={{ flexGrow: 1 }} />
           <Box sx={{ display: { xs: "none", md: "flex" } }}>
             <IconButton

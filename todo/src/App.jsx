@@ -155,15 +155,17 @@ const App = () => {
     }
   };
   const returnMatchingNotesFromSearchQuery = (searchQuery) => {
+    setSearchString(searchQuery);
+    setIsSearchBarFocused(true);
     if (searchQuery) {
-      setSearchString(searchQuery);
       const pattern = new RegExp(searchQuery, "gi");
       const results = notes.filter((note) => {
-        return note.noteText.match(pattern);
+        return note.noteContent.match(pattern);
       });
       setMatchingNotes(results);
     } else {
       setMatchingNotes([]);
+      setIsSearchBarFocused(false);
     }
   };
   const notesEditHandler = (id, newNote) => {
@@ -221,7 +223,7 @@ const App = () => {
   };
   return (
     <>
-      <NavigationBar />
+      <NavigationBar searchStringSetter={returnMatchingNotesFromSearchQuery} />
       <Box
         name="noteComponent"
         style={{
@@ -230,85 +232,127 @@ const App = () => {
           justifyContent: "center",
         }}
       >
-        <ClickAwayListener onClickAway={handleClickAway}>
-          <Box
-            name="noteComponent"
-            style={{ width: "550px", margin: "25px" }}
-            ref={enclosingDivRef}
-          >
-            <Paper elevation={2} name="noteComponent">
-              <form
-                // onBlur={formBlurHandler}
-                /*onFocus={mainInputFocusHandler}*/ name="noteComponent"
-              >
-                <WrapperDiv isMainInputFocused={isMainInputFocused}>
+        {!searchString && (
+          <ClickAwayListener onClickAway={handleClickAway}>
+            <Box
+              name="noteComponent"
+              style={{ width: "550px", margin: "25px" }}
+              ref={enclosingDivRef}
+            >
+              <Paper elevation={2} name="noteComponent">
+                <form
+                  // onBlur={formBlurHandler}
+                  /*onFocus={mainInputFocusHandler}*/ name="noteComponent"
+                >
+                  <WrapperDiv isMainInputFocused={isMainInputFocused}>
+                    <MyTextField
+                      name="title"
+                      id="title"
+                      placeholder="Title"
+                      style={{
+                        width: "100%",
+                      }}
+                      onChange={creationForm.handleChange}
+                      value={creationForm.values.title}
+                      // onBlur={titleBlurHandler}
+                    />
+                  </WrapperDiv>
                   <MyTextField
-                    name="title"
-                    id="title"
-                    placeholder="Title"
+                    name="noteContent"
+                    id="noteContent"
+                    placeholder="Take a note..."
                     style={{
                       width: "100%",
                     }}
+                    multiline
+                    maxRows={10}
                     onChange={creationForm.handleChange}
-                    value={creationForm.values.title}
-                    // onBlur={titleBlurHandler}
+                    value={creationForm.values.noteContent}
+                    // onBlur={textFieldBlurHandler}
+                    onClick={mainInputFocusHandler}
                   />
-                </WrapperDiv>
-                <MyTextField
-                  name="noteContent"
-                  id="noteContent"
-                  placeholder="Take a note..."
-                  style={{
-                    width: "100%",
-                  }}
-                  multiline
-                  maxRows={10}
-                  onChange={creationForm.handleChange}
-                  value={creationForm.values.noteContent}
-                  // onBlur={textFieldBlurHandler}
-                  onClick={mainInputFocusHandler}
-                />
-                {
-                  <NoteBottomBar
-                    isMainInputFocused={isMainInputFocused}
-                    closeBtnCallback={handleClickAway}
-                    name="noteComponent"
-                    doesNoteExist={false}
-                  />
-                }
-              </form>
-            </Paper>
-          </Box>
-        </ClickAwayListener>
-      </Box>
-      <Grid
-        container
-        spacing={1}
-        style={{ width: "100%" }}
-        justifyContent="center"
-      >
-        {notes.map((note) => {
-          return (
-            <Grid
-              item
-              xs={2.8}
-              key={note.id}
-              onClick={(e) => noteDisplayHandlerForParent(e, note.id)}
-              onMouseEnter={() => setIsCardHovered(true)}
-              onMouseLeave={() => setIsCardHovered(false)}
-            >
-              <Paper style={{ padding: "15px" }}>
-                <h2 onClick={(e) => noteDisplayHandlerForChildren(e, note.id)}>
-                  {note.title}
-                </h2>
-                <p onClick={(e) => noteDisplayHandlerForChildren(e, note.id)}>
-                  {note.noteContent}
-                </p>
+                  {
+                    <NoteBottomBar
+                      isMainInputFocused={isMainInputFocused}
+                      closeBtnCallback={handleClickAway}
+                      name="noteComponent"
+                      doesNoteExist={false}
+                    />
+                  }
+                </form>
               </Paper>
-            </Grid>
-          );
-        })}
-      </Grid>
+            </Box>
+          </ClickAwayListener>
+        )}
+      </Box>
+      {
+        <Grid
+          container
+          spacing={1}
+          style={{ width: "100%" }}
+          justifyContent="center"
+        >
+          {isSearchbarFocused
+            ? matchingNotes.map((note) => {
+                return (
+                  <Grid
+                    item
+                    xs={2.8}
+                    key={note.id}
+                    onClick={(e) => noteDisplayHandlerForParent(e, note.id)}
+                    // onMouseEnter={() => setIsCardHovered(true)}
+                    // onMouseLeave={() => setIsCardHovered(false)}
+                  >
+                    <Paper style={{ padding: "15px" }}>
+                      <h2
+                        onClick={(e) =>
+                          noteDisplayHandlerForChildren(e, note.id)
+                        }
+                      >
+                        {note.title}
+                      </h2>
+                      <p
+                        onClick={(e) =>
+                          noteDisplayHandlerForChildren(e, note.id)
+                        }
+                      >
+                        {note.noteContent}
+                      </p>
+                    </Paper>
+                  </Grid>
+                );
+              })
+            : notes.map((note) => {
+                return (
+                  <Grid
+                    item
+                    xs={2.8}
+                    key={note.id}
+                    onClick={(e) => noteDisplayHandlerForParent(e, note.id)}
+                    // onMouseEnter={() => setIsCardHovered(true)}
+                    // onMouseLeave={() => setIsCardHovered(false)}
+                  >
+                    <Paper style={{ padding: "15px" }}>
+                      <h2
+                        onClick={(e) =>
+                          noteDisplayHandlerForChildren(e, note.id)
+                        }
+                      >
+                        {note.title}
+                      </h2>
+                      <p
+                        onClick={(e) =>
+                          noteDisplayHandlerForChildren(e, note.id)
+                        }
+                      >
+                        {note.noteContent}
+                      </p>
+                    </Paper>
+                  </Grid>
+                );
+              })}
+        </Grid>
+      }
       <Dialog open={showDisplayNote} onClose={handleClose}>
         <EditForm
           activeNote={activeNote}
