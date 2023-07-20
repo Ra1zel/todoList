@@ -1,9 +1,8 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useContext } from "react";
 import { v4 as uuidv4 } from "uuid";
 import MainInput from "./components/MainInput";
 import NoteCard from "./components/NoteCard";
 import styled from "@emotion/styled";
-import Navbar from "./components/Navbar";
 import { NavigationBar } from "./components/Navbar";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
@@ -18,6 +17,7 @@ import ClickAwayListener from "@mui/base/ClickAwayListener";
 /////////////////
 import ColorLensOutlinedIcon from "@mui/icons-material/ColorLensOutlined";
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
+import { TodoListContext } from "../context/todoListContext";
 ////////////////
 // const MainContainer = styled.div`
 //   display: flex;
@@ -115,12 +115,18 @@ export const NoteBottomBar = ({
 };
 
 const App = () => {
-  const [notes, setNotes] = useState([]);
-  const [searchString, setSearchString] = useState("");
-  const [matchingNotes, setMatchingNotes] = useState([]);
-  const [isSearchbarFocused, setIsSearchBarFocused] = useState(false);
-  const [isMainInputFocused, setIsMainInputFocused] = useState(false);
-  const [showDisplayNote, setShowDisplayNote] = useState(false);
+  const {
+    searchString,
+    isSearchbarFocused,
+    matchingNotes,
+    notes,
+    isMainInputFocused,
+    showDisplayNote,
+    setIsMainInputFocused,
+    setNotes,
+    setShowDisplayNote,
+  } = useContext(TodoListContext);
+
   // const [isCardHovered, setIsCardHovered] = useState(false);
   const enclosingDivRef = useRef(null);
   const [activeNote, setActiveNote] = useState({
@@ -148,26 +154,12 @@ const App = () => {
       setNotes([...notes, newNote]);
     }
   };
-  const displaySearchResults = (isSearchbarFocused) => {
-    setIsSearchBarFocused(isSearchbarFocused);
-    if (!isSearchbarFocused) {
-      setMatchingNotes([]);
-    }
-  };
-  const returnMatchingNotesFromSearchQuery = (searchQuery) => {
-    setSearchString(searchQuery);
-    setIsSearchBarFocused(true);
-    if (searchQuery) {
-      const pattern = new RegExp(searchQuery, "gi");
-      const results = notes.filter((note) => {
-        return note.noteContent.match(pattern);
-      });
-      setMatchingNotes(results);
-    } else {
-      setMatchingNotes([]);
-      setIsSearchBarFocused(false);
-    }
-  };
+  // const displaySearchResults = (isSearchbarFocused) => {
+  //   setIsSearchBarFocused(isSearchbarFocused);
+  //   if (!isSearchbarFocused) {
+  //     setMatchingNotes([]);
+  //   }
+  // };
   const notesEditHandler = (id, newNote) => {
     const newNotesList = notes.map((note) => {
       if (note.id === id) {
@@ -223,7 +215,7 @@ const App = () => {
   };
   return (
     <>
-      <NavigationBar searchStringSetter={returnMatchingNotesFromSearchQuery} />
+      <NavigationBar />
       <Box
         name="noteComponent"
         style={{
@@ -232,7 +224,7 @@ const App = () => {
           justifyContent: "center",
         }}
       >
-        {!searchString && (
+        {!isSearchbarFocused && (
           <ClickAwayListener onClickAway={handleClickAway}>
             <Box
               name="noteComponent"
@@ -292,10 +284,11 @@ const App = () => {
           style={{ width: "100%" }}
           justifyContent="center"
         >
-          {isSearchbarFocused
+          {searchString
             ? matchingNotes.map((note) => {
                 return (
                   <Grid
+                    marginTop="15px"
                     item
                     xs={2.8}
                     key={note.id}

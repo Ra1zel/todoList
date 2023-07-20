@@ -1,38 +1,6 @@
-import Searchbar from "./Searchbar";
-// import styled from "@emotion/styled";
-import BurgerMenuLogo from "../assets/menu.svg";
-// const MyNavbar = styled.div`
-//   align-items: center;
-//   background-color: white;
-//   display: flex;
-//   margin-bottom: 30px;
-//   height: 70px;
-//   width: 100%;
-//   border-bottom: 1px solid #a2a0a08a;
-// `;
-
-// const BurgerMenuImg = styled.img`
-//   width: 24px;
-//   height: 24px;
-//   margin-inline: 20px;
-//   /* color: #5f6368; */
-//   color: red;
-// `;
-function Navbar({ queryHandler, getSearchbarState, searchbarState }) {
-  return (
-    <div>Hello</div>
-    // <MyNavbar>
-    //   <BurgerMenuImg src={BurgerMenuLogo} alt="Menu Symbol"></BurgerMenuImg>
-    //   <Searchbar
-    //     queryHandler={queryHandler}
-    //     getSearchbarState={getSearchbarState}
-    //     searchbarState={searchbarState}
-    //   />
-    // </MyNavbar>
-  );
-}
-
-import { useState } from "react";
+// import Searchbar from "./Searchbar";
+// import BurgerMenuLogo from "../assets/menu.svg";
+import { useContext, useState } from "react";
 import { styled, alpha } from "@mui/material/styles";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
@@ -51,6 +19,8 @@ import NotificationsIcon from "@mui/icons-material/Notifications";
 import MoreIcon from "@mui/icons-material/MoreVert";
 import { useFormik } from "formik";
 import ClearIcon from "@mui/icons-material/Clear";
+import { TodoListContext } from "../../context/todoListContext";
+
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
   display: "flex",
@@ -92,10 +62,14 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   },
 }));
 
-export const NavigationBar = ({ searchStringSetter }) => {
+export const NavigationBar = () => {
+  const {
+    returnMatchingNotesFromSearchQuery,
+    isSearchbarFocused,
+    setIsSearchBarFocused,
+  } = useContext(TodoListContext);
   const [anchorEl, setAnchorEl] = useState(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = useState(null);
-  const [isSearchFieldFocused, setIsSearchFieldFocused] = useState(null);
   const { values, setFieldValue, resetForm } = useFormik({
     initialValues: {
       searchField: "",
@@ -104,8 +78,8 @@ export const NavigationBar = ({ searchStringSetter }) => {
   const handleInputChange = (event) => {
     const { name, value } = event.target;
     setFieldValue(name, value);
-    searchStringSetter(value);
-    // queryHandler(value);
+    console.log("this was run");
+    returnMatchingNotesFromSearchQuery(value);
   };
   const isMenuOpen = Boolean(anchorEl);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
@@ -201,12 +175,12 @@ export const NavigationBar = ({ searchStringSetter }) => {
     </Menu>
   );
   const searchBarFocusHandler = () => {
-    setIsSearchFieldFocused(true);
+    setIsSearchBarFocused(true);
   };
   const searchCancellationHandler = () => {
-    setIsSearchFieldFocused(false);
-    searchStringSetter("");
+    returnMatchingNotesFromSearchQuery("");
     resetForm();
+    setIsSearchBarFocused(false);
   };
   return (
     <Box sx={{ flexGrow: 1 }}>
@@ -243,7 +217,7 @@ export const NavigationBar = ({ searchStringSetter }) => {
                 id="searchField"
                 value={values.searchField}
               />
-              {isSearchFieldFocused && (
+              {isSearchbarFocused && (
                 <ClearIcon
                   style={{
                     justifyContent: "center",
@@ -288,5 +262,3 @@ export const NavigationBar = ({ searchStringSetter }) => {
     </Box>
   );
 };
-
-export default Navbar;
