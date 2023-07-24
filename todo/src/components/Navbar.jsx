@@ -18,7 +18,7 @@ import NotificationsIcon from "@mui/icons-material/Notifications";
 import MoreIcon from "@mui/icons-material/MoreVert";
 import { useFormik } from "formik";
 import ClearIcon from "@mui/icons-material/Clear";
-import { activateSearchbar, deactivateSearchbar } from "../../store/actions";
+import { searchbarSlice } from "../../store/searchbarSlice";
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -63,7 +63,9 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 
 export const NavigationBar = ({ searchQueryHandler }) => {
   const dispatch = useDispatch();
-  const isSearchbarFocused = useSelector((state) => state.isSearchbarFocused);
+  const isSearchbarFocused = useSelector(
+    (state) => state.searchbarReducer.isSearchbarFocused
+  );
   const [anchorEl, setAnchorEl] = useState(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = useState(null);
   const { values, setFieldValue, resetForm } = useFormik({
@@ -170,12 +172,20 @@ export const NavigationBar = ({ searchQueryHandler }) => {
     </Menu>
   );
   const searchBarFocusHandler = () => {
-    dispatch(activateSearchbar());
+    dispatch(
+      searchbarSlice.actions.setState({
+        value: true,
+      })
+    );
   };
   const searchCancellationHandler = () => {
     searchQueryHandler("");
     resetForm();
-    dispatch(deactivateSearchbar());
+    dispatch(
+      searchbarSlice.actions.setState({
+        value: false,
+      })
+    );
   };
   return (
     <Box sx={{ flexGrow: 1 }}>

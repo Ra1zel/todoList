@@ -1,4 +1,10 @@
 import { configureStore } from "@reduxjs/toolkit";
-import notesReducer from "./reducer";
-const store = configureStore({ reducer: notesReducer });
+import { notesSlice } from "./notesSlice";
+import { searchbarSlice } from "./searchbarSlice";
+const store = configureStore({
+  reducer: {
+    notesReducer: notesSlice.reducer,
+    searchbarReducer: searchbarSlice.reducer,
+  },
+});
 export default store;

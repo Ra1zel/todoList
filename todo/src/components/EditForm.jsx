@@ -4,8 +4,8 @@ import styled from "@emotion/styled";
 import { useFormik } from "formik";
 import { NoteBottomBar } from "../App";
 import { useDispatch } from "react-redux";
-import { deleteNote, editNote } from "../../store/actions";
 import ClickAwayListener from "@mui/base/ClickAwayListener";
+import { notesSlice } from "../../store/notesSlice";
 const MyTextField = styled(TextField)({
   "& .MuiOutlinedInput-root": {
     "& fieldset": {
@@ -28,8 +28,13 @@ const EditForm = ({ activeNote, handleClose }) => {
       noteContent: activeNote.noteContent,
     },
     onSubmit: (values) => {
-      dispatch(editNote(activeNote.id, values.title, values.noteContent));
-      //   notesEditHandler(activeNote.id, values);
+      dispatch(
+        notesSlice.actions.edit({
+          id: activeNote.id,
+          noteTitle: values.title,
+          noteContent: values.noteContent,
+        })
+      );
       handleClose();
     },
   });
@@ -67,7 +72,13 @@ const EditForm = ({ activeNote, handleClose }) => {
           ></MyTextField>
           <NoteBottomBar
             closeBtnCallback={closeHandler}
-            noteDeletionCb={() => dispatch(deleteNote(activeNote.id))}
+            noteDeletionCb={() =>
+              dispatch(
+                notesSlice.actions.delete({
+                  id: activeNote.id,
+                })
+              )
+            }
             noteId={activeNote.id}
             doesNoteExist={true}
           />
