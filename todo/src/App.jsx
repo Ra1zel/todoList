@@ -1,7 +1,5 @@
-import { useState, useRef, useContext } from "react";
+import { useState, useRef } from "react";
 import { v4 as uuidv4 } from "uuid";
-import MainInput from "./components/MainInput";
-import NoteCard from "./components/NoteCard";
 import styled from "@emotion/styled";
 import { NavigationBar } from "./components/Navbar";
 import Box from "@mui/material/Box";
@@ -12,20 +10,11 @@ import Grid from "@mui/material/Grid";
 import Dialog from "@mui/material/Dialog";
 import Button from "@mui/material/Button";
 import EditForm from "./components/editForm";
-import Icon from "@mui/material/Icon";
 import ClickAwayListener from "@mui/base/ClickAwayListener";
-/////////////////
+import { useSelector, useDispatch } from "react-redux";
 import ColorLensOutlinedIcon from "@mui/icons-material/ColorLensOutlined";
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
-import { TodoListContext } from "../context/todoListContext";
-////////////////
-// const MainContainer = styled.div`
-//   display: flex;
-//   flex-direction: column;
-//   align-items: center;
-//   justify-content: center;
-//   margin-top: 50px;
-// `;
+import { addNote } from "../store/actions";
 const MyTextField = styled(TextField)({
   "& .MuiOutlinedInput-root": {
     "& fieldset": {
@@ -115,19 +104,14 @@ export const NoteBottomBar = ({
 };
 
 const App = () => {
-  const {
-    searchString,
-    isSearchbarFocused,
-    matchingNotes,
-    notes,
-    isMainInputFocused,
-    showDisplayNote,
-    setIsMainInputFocused,
-    setNotes,
-    setShowDisplayNote,
-  } = useContext(TodoListContext);
+  const [isMainInputFocused, setIsMainInputFocused] = useState(false);
+  const [matchingNotes, setMatchingNotes] = useState([]);
+  const [searchString, setSearchString] = useState("");
+  const [showDisplayNote, setShowDisplayNote] = useState(false);
+  const notes = useSelector((state) => state.notes);
+  const dispatch = useDispatch();
+  const isSearchbarFocused = useSelector((state) => state.isSearchbarFocused);
 
-  // const [isCardHovered, setIsCardHovered] = useState(false);
   const enclosingDivRef = useRef(null);
   const [activeNote, setActiveNote] = useState({
     id: "",
@@ -151,36 +135,8 @@ const App = () => {
   });
   const notesCreationHandler = (newNote) => {
     if (newNote.noteContent || newNote.title) {
-      setNotes([...notes, newNote]);
+      dispatch(addNote(newNote.title, newNote.noteContent));
     }
-  };
-  // const displaySearchResults = (isSearchbarFocused) => {
-  //   setIsSearchBarFocused(isSearchbarFocused);
-  //   if (!isSearchbarFocused) {
-  //     setMatchingNotes([]);
-  //   }
-  // };
-  const notesEditHandler = (id, newNote) => {
-    const newNotesList = notes.map((note) => {
-      if (note.id === id) {
-        return {
-          id: id,
-          title: newNote.title,
-          noteContent: newNote.noteContent,
-        };
-      } else {
-        return note;
-      }
-    });
-    setNotes(newNotesList);
-  };
-  const notesDeletionHandler = (id) => {
-    const newNotesList = notes.filter((note) => {
-      if (id !== note.id) {
-        return note;
-      }
-    });
-    setNotes(newNotesList);
   };
   const mainInputFocusHandler = () => {
     setIsMainInputFocused(true);
@@ -213,9 +169,23 @@ const App = () => {
     setIsMainInputFocused(false);
     creationForm.handleSubmit();
   };
+
+  const returnMatchingNotesFromSearchQuery = (searchQuery) => {
+    if (searchQuery) {
+      setSearchString(searchQuery);
+      const pattern = new RegExp(searchQuery, "gi");
+      const results = notes.filter((note) => {
+        return note.content.match(pattern);
+      });
+      setMatchingNotes(results);
+    } else {
+      setSearchString("");
+      setMatchingNotes([...notes]);
+    }
+  };
   return (
     <>
-      <NavigationBar />
+      <NavigationBar searchQueryHandler={returnMatchingNotesFromSearchQuery} />
       <Box
         name="noteComponent"
         style={{
@@ -232,10 +202,7 @@ const App = () => {
               ref={enclosingDivRef}
             >
               <Paper elevation={2} name="noteComponent">
-                <form
-                  // onBlur={formBlurHandler}
-                  /*onFocus={mainInputFocusHandler}*/ name="noteComponent"
-                >
+                <form name="noteComponent">
                   <WrapperDiv isMainInputFocused={isMainInputFocused}>
                     <MyTextField
                       name="title"
@@ -246,7 +213,6 @@ const App = () => {
                       }}
                       onChange={creationForm.handleChange}
                       value={creationForm.values.title}
-                      // onBlur={titleBlurHandler}
                     />
                   </WrapperDiv>
                   <MyTextField
@@ -260,7 +226,6 @@ const App = () => {
                     maxRows={10}
                     onChange={creationForm.handleChange}
                     value={creationForm.values.noteContent}
-                    // onBlur={textFieldBlurHandler}
                     onClick={mainInputFocusHandler}
                   />
                   {
@@ -293,8 +258,6 @@ const App = () => {
                     xs={2.8}
                     key={note.id}
                     onClick={(e) => noteDisplayHandlerForParent(e, note.id)}
-                    // onMouseEnter={() => setIsCardHovered(true)}
-                    // onMouseLeave={() => setIsCardHovered(false)}
                   >
                     <Paper style={{ padding: "15px" }}>
                       <h2
@@ -309,7 +272,7 @@ const App = () => {
                           noteDisplayHandlerForChildren(e, note.id)
                         }
                       >
-                        {note.noteContent}
+                        {note.content}
                       </p>
                     </Paper>
                   </Grid>
@@ -322,8 +285,6 @@ const App = () => {
                     xs={2.8}
                     key={note.id}
                     onClick={(e) => noteDisplayHandlerForParent(e, note.id)}
-                    // onMouseEnter={() => setIsCardHovered(true)}
-                    // onMouseLeave={() => setIsCardHovered(false)}
                   >
                     <Paper style={{ padding: "15px" }}>
                       <h2
@@ -338,7 +299,7 @@ const App = () => {
                           noteDisplayHandlerForChildren(e, note.id)
                         }
                       >
-                        {note.noteContent}
+                        {note.content}
                       </p>
                     </Paper>
                   </Grid>
@@ -350,27 +311,8 @@ const App = () => {
         <EditForm
           activeNote={activeNote}
           handleClose={handleClose}
-          notesEditHandler={notesEditHandler}
           closeBtnCallback={handleClose}
-          deletionCallback={notesDeletionHandler}
         />
-        {/* <DialogTitle>{activeNote.title}</DialogTitle>
-        <DialogContent>
-          <DialogContentText>{activeNote.noteContent}</DialogContentText>
-          <TextField
-            autoFocus
-            margin="dense"
-            id="name"
-            label="Email Address"
-            type="email"
-            fullWidth
-            variant="standard"
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose}>Cancel</Button>
-          <Button onClick={handleClose}>Subscribe</Button>
-        </DialogActions> */}
       </Dialog>
     </>
   );

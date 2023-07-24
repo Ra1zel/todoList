@@ -3,6 +3,9 @@ import TextField from "@mui/material/TextField";
 import styled from "@emotion/styled";
 import { useFormik } from "formik";
 import { NoteBottomBar } from "../App";
+import { useDispatch } from "react-redux";
+import { deleteNote, editNote } from "../../store/actions";
+import ClickAwayListener from "@mui/base/ClickAwayListener";
 const MyTextField = styled(TextField)({
   "& .MuiOutlinedInput-root": {
     "& fieldset": {
@@ -17,19 +20,16 @@ const MyTextField = styled(TextField)({
   },
 });
 
-const EditForm = ({
-  activeNote,
-  handleClose,
-  notesEditHandler,
-  deletionCallback,
-}) => {
+const EditForm = ({ activeNote, handleClose }) => {
+  const dispatch = useDispatch();
   const editForm = useFormik({
     initialValues: {
       title: activeNote.title,
       noteContent: activeNote.noteContent,
     },
     onSubmit: (values) => {
-      notesEditHandler(activeNote.id, values);
+      dispatch(editNote(activeNote.id, values.title, values.noteContent));
+      //   notesEditHandler(activeNote.id, values);
       handleClose();
     },
   });
@@ -37,8 +37,15 @@ const EditForm = ({
     const { name, value } = e.target;
     editForm.setFieldValue(name, value);
   };
+  const handleClickAway = () => {
+    editForm.handleSubmit();
+  };
+  const closeHandler = () => {
+    editForm.handleSubmit();
+    handleClose();
+  };
   return (
-    <div onBlur={editForm.handleSubmit}>
+    <ClickAwayListener onClickAway={handleClickAway}>
       <Box>
         <form
           style={{ display: "flex", flexDirection: "column", width: "500px" }}
@@ -59,14 +66,14 @@ const EditForm = ({
             onChange={onInputChange}
           ></MyTextField>
           <NoteBottomBar
-            closeBtnCallback={handleClose}
-            noteDeletionCb={deletionCallback}
+            closeBtnCallback={closeHandler}
+            noteDeletionCb={() => dispatch(deleteNote(activeNote.id))}
             noteId={activeNote.id}
             doesNoteExist={true}
           />
         </form>
       </Box>
-    </div>
+    </ClickAwayListener>
   );
 };
 

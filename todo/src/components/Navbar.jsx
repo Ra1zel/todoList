@@ -1,6 +1,5 @@
-// import Searchbar from "./Searchbar";
-// import BurgerMenuLogo from "../assets/menu.svg";
-import { useContext, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useState } from "react";
 import { styled, alpha } from "@mui/material/styles";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
@@ -19,7 +18,7 @@ import NotificationsIcon from "@mui/icons-material/Notifications";
 import MoreIcon from "@mui/icons-material/MoreVert";
 import { useFormik } from "formik";
 import ClearIcon from "@mui/icons-material/Clear";
-import { TodoListContext } from "../../context/todoListContext";
+import { activateSearchbar, deactivateSearchbar } from "../../store/actions";
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -62,12 +61,9 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   },
 }));
 
-export const NavigationBar = () => {
-  const {
-    returnMatchingNotesFromSearchQuery,
-    isSearchbarFocused,
-    setIsSearchBarFocused,
-  } = useContext(TodoListContext);
+export const NavigationBar = ({ searchQueryHandler }) => {
+  const dispatch = useDispatch();
+  const isSearchbarFocused = useSelector((state) => state.isSearchbarFocused);
   const [anchorEl, setAnchorEl] = useState(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = useState(null);
   const { values, setFieldValue, resetForm } = useFormik({
@@ -78,8 +74,7 @@ export const NavigationBar = () => {
   const handleInputChange = (event) => {
     const { name, value } = event.target;
     setFieldValue(name, value);
-    console.log("this was run");
-    returnMatchingNotesFromSearchQuery(value);
+    searchQueryHandler(value);
   };
   const isMenuOpen = Boolean(anchorEl);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
@@ -175,12 +170,12 @@ export const NavigationBar = () => {
     </Menu>
   );
   const searchBarFocusHandler = () => {
-    setIsSearchBarFocused(true);
+    dispatch(activateSearchbar());
   };
   const searchCancellationHandler = () => {
-    returnMatchingNotesFromSearchQuery("");
+    searchQueryHandler("");
     resetForm();
-    setIsSearchBarFocused(false);
+    dispatch(deactivateSearchbar());
   };
   return (
     <Box sx={{ flexGrow: 1 }}>
