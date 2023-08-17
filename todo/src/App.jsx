@@ -1,5 +1,4 @@
-import { useState, useRef } from "react";
-import { v4 as uuidv4 } from "uuid";
+import { useState, useRef, useEffect } from "react";
 import styled from "@emotion/styled";
 import { NavigationBar } from "./components/Navbar";
 import Box from "@mui/material/Box";
@@ -14,7 +13,8 @@ import ClickAwayListener from "@mui/base/ClickAwayListener";
 import { useSelector, useDispatch } from "react-redux";
 import ColorLensOutlinedIcon from "@mui/icons-material/ColorLensOutlined";
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
-import { addNote } from "../store/actions";
+// import { addNote } from "../store/actions";
+import { notesSlice } from "../store/notesSlice";
 const MyTextField = styled(TextField)({
   "& .MuiOutlinedInput-root": {
     "& fieldset": {
@@ -108,15 +108,21 @@ const App = () => {
   const [matchingNotes, setMatchingNotes] = useState([]);
   const [searchString, setSearchString] = useState("");
   const [showDisplayNote, setShowDisplayNote] = useState(false);
-  const notes = useSelector((state) => state.notes);
+  const notes = useSelector((state) => state.notesReducer.notes);
+  const isSearchbarFocused = useSelector(
+    (state) => state.searchbarReducer.isSearchbarFocused
+  );
   const dispatch = useDispatch();
-  const isSearchbarFocused = useSelector((state) => state.isSearchbarFocused);
 
   const enclosingDivRef = useRef(null);
+  useEffect(() => {
+    returnMatchingNotesFromSearchQuery(searchString);
+  }, [notes]);
+
   const [activeNote, setActiveNote] = useState({
     id: "",
     title: "",
-    noteContent: "",
+    content: "",
   });
 
   const creationForm = useFormik({
@@ -127,7 +133,6 @@ const App = () => {
     onSubmit: (values) => {
       const finalNote = {
         ...values,
-        id: uuidv4(),
       };
       notesCreationHandler(finalNote);
       creationForm.resetForm();
@@ -135,7 +140,12 @@ const App = () => {
   });
   const notesCreationHandler = (newNote) => {
     if (newNote.noteContent || newNote.title) {
-      dispatch(addNote(newNote.title, newNote.noteContent));
+      dispatch(
+        notesSlice.actions.add({
+          noteTitle: newNote.title,
+          noteContent: newNote.noteContent,
+        })
+      );
     }
   };
   const mainInputFocusHandler = () => {
@@ -182,6 +192,20 @@ const App = () => {
       setSearchString("");
       setMatchingNotes([...notes]);
     }
+  };
+  const sendUpdate = (editedNote) => {
+    const newArray = matchingNotes.map((note) => {
+      if (note.id === editedNote.id) {
+        return {
+          id: editedNote.id,
+          title: editedNote.title,
+          content: editedNote.content,
+        };
+      } else {
+        return note;
+      }
+    });
+    setMatchingNotes(newArray);
   };
   return (
     <>
@@ -312,6 +336,7 @@ const App = () => {
           activeNote={activeNote}
           handleClose={handleClose}
           closeBtnCallback={handleClose}
+          sendUpdate={sendUpdate}
         />
       </Dialog>
     </>
